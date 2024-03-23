@@ -16,4 +16,10 @@ public class Node<K, V> {
     public final V getValue(){
         return value;
     }
+    public final void redefinitionNext(Node<K, V> nextNode){
+        this.next = nextNode;
+    }
+    public final Node<K, V> getNext(){
+        return next;
+    }
 }

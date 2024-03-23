@@ -33,15 +33,28 @@ public class HashMap<K, V> {
         int index = indexHash(hash);
         if (array[index] == null) {
             this.array[index] = new Node<K, V>(hash, key, value, null);
+        } else {
+            if (getNodeByCell(array[index]).getKey().equals(key)){
+                this.array[index] = new Node<K, V>(hash, key, value, null);
+            } else {
+                Node<K, V> currentNode = getNodeByCell(array[index]);
+                do {
+                    currentNode = currentNode.getNext();
+                } while (currentNode.getNext() != null);
+                currentNode.redefinitionNext(new Node<K, V>(hash, key, value, null));
+            }
         }
     }
 
-    private Node<K, V> getNode(K key) {
+    public Node<K, V> getNode(K key) {
         if (containsKey(key)) {
             return (Node<K, V>) array[indexHash(hash(key))];
         } else {
             throw new IllegalArgumentException("Wrong key");
         }
+    }
+    private Node<K, V> getNodeByCell(Object cell) {
+        return (Node<K, V>) cell;
     }
 
     public V get(K key) {
@@ -55,16 +68,26 @@ public class HashMap<K, V> {
     public boolean containsKey(K key) {
         int hash = hash(key);
         int index = indexHash(hash);
-        return array[index] != null;
+        Node<K, V> currentNode = getNodeByCell(array[index]);
+        do {
+            if (currentNode.getKey().equals(key)){
+                return true;
+            }
+            currentNode = currentNode.getNext();
+        }while (currentNode.getNext() != null);
+        return false;
     }
 
     public boolean containsValue(V value) {
         for (Object element : array) {
             if (element instanceof Node) {
-                Node<K, V> node = (Node<K, V>) element;
-                if (node.getValue().equals(value)) {
-                    return true;
-                }
+                Node<K, V> currentNode = (Node<K, V>) element;
+                    do {
+                        if (currentNode.getValue().equals(value)) {
+                            return true;
+                        }
+                        currentNode = currentNode.getNext();
+                    } while (currentNode.getNext() != null);
             }
         }
         return false;
@@ -74,7 +97,14 @@ public class HashMap<K, V> {
             size--;
             int hash = hash(key);
             int index = indexHash(hash);
-            array[index] = null;
+            Node<K, V> currentNode = getNodeByCell(array[index]);
+            do {
+                if (currentNode.getNext().getKey().equals(key)) {
+                    currentNode.redefinitionNext(currentNode.getNext().getNext());
+                    break;
+                }
+                currentNode = currentNode.getNext();
+            } while (currentNode.getNext() != null);
         } else {
             throw new IllegalArgumentException("Wrong key");
         }
@@ -84,7 +114,7 @@ public class HashMap<K, V> {
     }
     public void clear(){
         for(int i =0; i<size;i++){
-            array[i]=0;
+            array[i]=null;
         }
         size = 0;
     }
@@ -100,4 +130,5 @@ public class HashMap<K, V> {
     public int getCapacity(){
         return capacity;
     }
+
 }
